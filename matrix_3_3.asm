@@ -14,6 +14,7 @@
     msg_add DB 'Addition: $'
     msg_sub DB 10,13,'Subtraction: $'
     msg_mul DB 10,13,'Multiplication: $'
+    msg_div DB 10,13,'Division: $'
     newline DB 10,13,'$'
 
 .CODE
@@ -119,6 +120,42 @@ MUL_LOOP:
     INT 21H
 SKIP_NEWLINE3:
     LOOP MUL_LOOP
+    
+    ; Division (element-wise)
+    LEA DX, msg_div
+    MOV AH, 09H
+    INT 21H
+    
+    MOV SI, 0
+    MOV CX, 9
+DIV_LOOP:
+    MOV AL, matrix1[SI]      ; Load element from matrix1
+    MOV BL, matrix2[SI]      ; Load element from matrix2
+    CMP BL, 0                ; Check if divisor is zero
+    JE SKIP_DIV              ; Skip division if divisor is zero
+    DIV BL                   ; Divide AL by BL
+    MOV result[SI], AL       ; Store result
+
+    ; Print result
+    MOV DL, AL
+    ADD DL, '0'              ; Convert to ASCII
+    MOV AH, 02H
+    INT 21H
+    MOV DL, ' '
+    INT 21H
+
+SKIP_DIV:
+    INC SI
+    MOV AX, SI
+    MOV BL, 3
+    DIV BL
+    CMP AH, 0
+    JNE SKIP_NEWLINE4
+    LEA DX, newline
+    MOV AH, 09H
+    INT 21H
+SKIP_NEWLINE4:
+    LOOP DIV_LOOP
     
     ; Exit program
     MOV AH, 4CH
